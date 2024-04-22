@@ -1,0 +1,35 @@
+<!-- investment_report.html -->
+
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block content %}
+    <h1 class="mb-4">Investment Report Upto Date</h1>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Investment Group</th>
+                <th>Investment Name</th>
+                <th>Cumulative Principal</th>
+                <th>Cumm Interest To Date</th>
+                <th>Available Balance </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for group_data in report_data %}
+                <tr>
+                    <td>{{ group_data.group_name }}</td>
+                    <td>
+                        {% for investment in group_data.investments %}
+                            {{ investment.investment_name }}<br>
+                        {% endfor %}
+                    </td>
+                    <td>{{ group_data.initial_investment_total|floatformat:2|intcomma }}</td>
+                    <td>{{ group_data.cumulative_interest_total|floatformat:2|intcomma }}</td>
+                    <td>{{ group_data.final_investment_total|floatformat:2|intcomma}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

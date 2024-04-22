@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block content %}
+    <h1 class="mb-4">Delete Transaction</h1>
+    <p>Are you sure you want to delete the following transaction?</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Investment Name</th>
+                <th>Transaction Type</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ transaction.investment.investment_name }}</td>
+                <td>{{ transaction.transaction_type }}</td>
+                <td>{{ transaction.amount }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete Transaction</button>
+        <a href="{% url 'transaction_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block content %}
+    <!-- Your content for investment_list.html goes here -->
+    <h1 class="mb-4">Investment List</h1><br>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Group</th>
+            <th>Investment Name</th>
+           <!-- <th>Amount Invested</th>-->
+            <th>Principal</th>
+            <th>Investment Period(months)</th>
+            <th>Interest Rate</th>
+           
+            <th>Date</th> <!-- Add a new column for the action buttons -->
+            <th>Action</th>
+           
+        </tr>
+    </thead>
+    <tbody>
+        {% for investment in investments %}
+            <tr>
+                <td>
+                    {% for group in investment.investment_group.all %}
+                       <a href="{% url 'investment_group_details' group.id%}" >{{ group.name }}</a>
+                        {% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </td>
+                <td><a href="{% url 'investment_detail' investment.id %}">{{ investment.investment_name }}</a></td>
+               <!--<td>{{ investment.amount_invested| intcomma}}</td>-->
+                <td>{{ investment.amount_invested| intcomma}}</td>
+               
+                <td>{{ investment.investment_period }}</td>
+                <td>{{ investment.interest_rate }}</td>
+               
+                <td>{{ investment.investment_start_date }}</td>
+                <td>
+                    <!-- Add a delete button that links to the delete view for each investment -->
+                    <form method="post" action="{% url 'delete_investment' investment.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                    <!-- Add an edit button that links to the edit view for each investment -->
+                    <a href="{% url 'edit_investment' investment.id %}" class="btn btn-warning btn-sm">Edit</a>
+                </td>
+             
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
+
+
+    
+
+

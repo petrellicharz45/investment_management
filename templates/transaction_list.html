@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block content %}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">Transactions</h2>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Group</th>
+                                <th>Investment Name</th>
+                                <th>Transaction Type</th>
+                                <th>Amount</th>
+                                <th>Added By</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in transactions %}
+                                <tr>
+                                    <td>{{ transaction.transaction_date | date:"F d Y" }}</td>
+                                    <td>
+                                        {% for group in transaction.investment.investment_group.all|dictsort:"name" %}
+                                            {{ group.name }}
+                                            {% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    <td>{{ transaction.investment.investment_name }}</td>
+                                    <td>{{ transaction.transaction_type }}</td>
+                                    <td>{{ transaction.amount | intcomma }}</td>
+                                    <td>{{ transaction.added_by.first_name }}</td>
+                                    <td>
+                                        <a href="{% url 'transaction_edit' transaction.id %}" class="btn btn-warning btn-sm">Edit</a>
+                                        <a href="{% url 'transaction_delete' transaction.id %}" class="btn btn-danger btn-sm">Delete</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% if messages %}
+                        <div class="container">
+                            <div class="row justify-content-center">
+                                <div class="col-lg-8">
+                                    <div class="alert alert-warning">
+                                        <ul>
+                                            {% for message in messages %}
+                                                <li>{{ message }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

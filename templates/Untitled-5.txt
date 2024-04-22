@@ -1,0 +1,44 @@
+<script>
+   function calculateInvestmentSchedule() {
+    var period = $('#period').val();
+
+    if (!period) {
+        alert('Please select a period.');
+        return;
+    }
+
+    var investmentId = "{{ investment.id }}";
+
+    $.ajax({
+        url: '/investment_detail/' + investmentId + '/',
+        data: { period: period },
+        dataType: 'json',
+        success: function (data) {
+            var tableBody = $('#investmentScheduleTableBodyData');
+            tableBody.empty();
+
+            if (data.length === 0) {
+                tableBody.append('<tr><td colspan="3">No investment schedule data available.</td></tr>');
+            } else {
+                for (var i = 0; i < data.length; i++) {
+                    var entry = data[i];
+                    var row = $('<tr>');
+                    row.append($('<td>').text(entry.date));
+                    row.append($('<td>').text(entry.interest_earned));
+                    row.append($('<td>').text(entry.total_amount));
+                    tableBody.append(row);
+                }
+            }
+
+            // Show the investment schedule card if it is not already expanded
+            if (!$('#investmentScheduleTableBody').hasClass('show')) {
+                $('#investmentScheduleTableBody').collapse('show');
+            }
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            console.error('Error fetching investment schedule:', errorThrown);
+        }
+    });
+}
+
+</script>

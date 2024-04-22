@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="text-center">Investment Group Details</h1>
+                </div>
+                <div class="card-body">
+                    <h2>Investment Group Name:</h2>
+                    <p>{{ group.name }}</p>  <!-- Display InvestmentGroup name -->
+                    
+                    <h2>Investments in This Group:</h2>
+                    <ul>
+                        {% for investment in investments %}
+                        <li>
+                            <a href="{% url 'investment_detail' investment.id %}">{{ investment.investment_name }}</a>
+                            <!-- Display other investment details as needed -->
+                        </li>
+                        {% empty %}
+                            <li>No investments in this group.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card mt-4">
+        <div class="card-header">
+            <h2 class="text-center">Investment Group  Schedule</h2>
+            <form method="get" action="{% url 'group_investment_schedule' group.id %}" >
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label for="period">Select Period:</label>
+                        <select class="form-control" id="period" name="period">
+                            <option value="monthly">Monthly</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="daily">Daily</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Show Schedule</button>
+            </form>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<form method="post" class="my-3">
+    {% csrf_token %}
+    <div class="mb-3">
+        {{ form.name.label_tag }} {{ form.name }}
+        {% if form.name.errors %}
+            <div class="invalid-feedback">
+                {{ form.name.errors|join:", " }}
+            </div>
+        {% endif %}
+    </div>
+    <button type="submit" class="btn btn-primary">Create Group</button>
+</form>
+{% endblock %}

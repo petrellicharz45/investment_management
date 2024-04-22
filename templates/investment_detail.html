@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="text-center">Investment Details</h1>
+                </div>
+                <div class="card-body">
+                    <h2>Investment Groups:</h2>
+                    <ul>
+                        {% for group in investment_groups %}
+                        <a href="{% url 'group_details' group.id %}"><li>{{ group.name }}</li></a>  <!-- Assuming InvestmentGroup has a 'name' field -->
+                        {% empty %}
+                            <li>No investment groups associated with this investment.</li>
+                        {% endfor %}
+                    </ul>
+                    <p><strong>Investment Name:</strong><h2>{{ investment.investment_name }}</h2>
+                    <p><strong>Investment Period:</strong> {{ investment.investment_period }}</p>
+                    <p><strong>Interest Rate:</strong> {{ investment.interest_rate }}</p>
+                    <p><strong>Amount Invested:</strong> {{ investment.amount_invested|intcomma }}</p>
+                   <!-- <p><strong>Principal:</strong> {{ investment.principal |intcomma }}</p>-->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card mt-4">
+        <div class="card-header">
+            <h2 class="text-center">Investment Schedule</h2>
+            <form method="post" action="{% url 'schedule' investment.id %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <select class="form-control" id="period" name="period">
+                    <option value="monthly">Monthly</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="daily">Daily</option>
+                </select>
+                <button type="submit" class="btn  btn-primary" data-toggle="collapse" data-target="#investmentScheduleTableBody">
+                    Show Schedule
+                </button>
+            </form>
+        </div>
+        <div id="scheduleTemplatePlaceholder" style="display: none;">
+            <!-- The content of the schedule.html template will be inserted here dynamically -->
+        </div>
+        
+    </div>
+</div>
+<script>
+    // Use jQuery in noConflict mode
+    jQuery.noConflict();
+    (function ($) {
+        // Your jQuery code here
+        $(document).ready(function () {
+            $('#investmentScheduleTableBodyData').DataTable();
+        });
+    })(jQuery);
+</script>
+
+{% endblock %}

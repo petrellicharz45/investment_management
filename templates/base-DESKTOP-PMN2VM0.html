@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Investment Management System</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/all.min.css' %}" integrity="sha512-4fCvs2wMZ5Y9Lb1buxF0GLy0C9hTb7o8JKLhEJY5Tp0BYYOqCfUkLMZhZTkwSqC4wjzR1B3P6gV6U/+fG9mig==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{% static 'css/jquery.dataTables.min.css' %}">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- jQuery -->
+    <script src="{% static 'js/jquery.min.js' %} "></script>
+
+    <!-- Bootstrap JS -->
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/Chart.min.js' %}"></script>
+    <!-- DataTables JS -->
+    <script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <!-- Chart.js -->
+    <script src="{% static 'js/chart.js' %} "></script>
+
+    <!-- Plotly -->
+    <script src="{% static 'js/plotly-latest.min.js' %} "></script>
+    <style>
+        body {
+          display: flex;
+          flex-direction: column;
+            background-image: url("{% static '/images/finance.jpg' %}");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    padding: 0;
+    margin: 0;
+    min-height: 100vh;
+        }
+
+        .top-bar {
+            background-color: #f8f9fa;
+            text-align: center;
+            padding: 10px;
+            color: #000;
+        }
+       
+        .main-container {
+            display: flex;
+            flex-direction: column; /* Set the main-container to flex-direction: column */
+            justify-content: center;
+            align-items: center; 
+            flex-grow: 1;
+            background-color: rgba(255, 255, 255, 0.7);
+            max-width:100%;
+            margin-top: -620px;
+            margin-left: 200px;
+            padding: 20px;
+            border-radius: 0px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar {
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            margin-right: 20px;
+            width: 200px; /* Sidebar width */
+            min-height: 100vh; /* Set the sidebar height to 100% of the viewport height */
+            
+        }
+
+        .sidebar h2 {
+            margin-bottom: 20px;
+
+            color: #007bff;
+            font-size: 24px;
+        }
+        /* Add this CSS to make the links push down when the dropdown menu expands */
+    .nav-item.open .nav-link {
+        margin-bottom: 0px; /* Set the margin to 0 to avoid pushing the links down */
+    }
+
+    /* Ensure the links are properly aligned */
+    .dropdown-menu-dark {
+        position: static;
+        float: none;
+    }
+
+    /* Fix padding and margin for the links in dropdown */
+    .dropdown-menu-dark .dropdown-item {
+        padding: 0.25rem 1.5rem;
+        margin: 0.125rem 0;
+    }
+
+
+        .sidebar .nav-link {
+            color: #000;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        .sidebar .nav-link:hover {
+            color: #00ffaa;
+        }
+        .sidebar .nav-link:hover,
+    .sidebar .nav-link.active {
+        color: #00ff88; /* Text color for hover and active links */
+    }
+
+    .sidebar .nav-link.active::before {
+        content: "\f105"; /* Unicode for the checkmark icon */
+        font-family: "Font Awesome 5 Free"; /* Font Awesome 5 Free font */
+        font-weight: 900;
+        margin-right: 5px;
+    }
+    .fa-caret-down {
+  float: right;
+  padding-right: 8px;
+  color: white;
+}
+    .dropdown-menu.show {
+        max-height: none; /* Remove the max-height to allow it to expand */
+        transition: max-height 0.3s ease-in-out;
+    }
+    .custom-checkbox input[type="checkbox"] {
+        /* You can adjust the size as needed */
+        width: 20px;
+        height: 20px;
+    }
+    /* Add this CSS to make the links push down when the dropdown menu expands */
+    .nav-item.open .nav-link {
+        margin-bottom: 0px; /* Set the margin to 0 to avoid pushing the links down */
+    }
+    .sidebar a:hover, .dropdown-btn:hover {
+  color: #db0b0b;
+}
+
+    /* Ensure the links are properly aligned */
+    .dropdown-menu-dark {
+        position: static;
+        float: none;
+    }
+
+    /* Fix padding and margin for the links in dropdown */
+    .dropdown-menu-dark .dropdown-item {
+        padding: 0.25rem 1.5rem;
+        margin: 0.125rem 0;
+    }
+ .footer {
+    padding: 10px 0;
+    margin-bottom: -15px;
+
+}
+ 
+    
+    </style>
+</head>
+<body>
+<!-- Top Bar -->
+<div class="top-bar hide-on-print">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-md-2">
+                        <a href="#" id="profileDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            {% if user_profile.profile_photo %}
+                            <img src="{{ user_profile.profile_photo.url }}" alt="Profile Picture" class="img-thumbnail rounded-circle" style="width: 50px; height: 50px;">
+                        {% else %}
+                            <img src="{% static '/images/finance.jpg' %}" alt="Default Profile Picture" class="img-thumbnail rounded-circle" style="width: 50px; height: 50px;">
+                        {% endif %}
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="profileDropdown">
+                            
+                            <!-- Add other dropdown items if needed -->
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <h3>Welcome: {{ user.first_name }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 text-right">
+                <a href="{% url 'login' %}" class="btn btn-danger">Logout</a> 
+                <a class="btn btn-warning" href="{% url 'profile_edit' %}">
+                     Edit Profile
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="sidebar-wrapper hide-on-print">
+    <div class="sidebar bg-primary">
+        <a class="nav-link" href="{% url 'dashboard' %}">
+            <h2 class="text-light">Dashboard</h2>
+        </a>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link text-light expandable" href="#" id="investmentsDropdown">
+                Investments
+                    <span class="float-right expand-icon">   <i class="fa fa-caret-cross"></i></span>
+                </a>
+                <div class="collapse dropdown-container" aria-labelledby="investmentsDropdown">
+                    <a class="dropdown-item" href="{% url 'investment_list' %}">
+                        <i class=""></i> Investment List
+                    </a>
+                    <a class="dropdown-item" href="{% url 'add_investment' %}">
+                        <i class=""></i> Add Investment
+                    </a>
+                    <!-- Add more investment-related links here -->
+                </div>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-light expandable" href="#" id="transactionsDropdown">
+                Transactions
+                    <span class="float-right expand-icon"><i class="fa fa-caret-downl"></i></span>
+                </a>
+                <div class="collapse dropdown-container" aria-labelledby="transactionsDropdown">
+                    <a class="dropdown-item" href="{% url 'add_transaction' %}">
+                        <i class=""></i> New Transaction
+                    </a>
+                    <a class="dropdown-item" href="{% url 'transaction_list' %}">
+                        <i class=""></i> Transaction List
+                    </a>
+                    <!-- Add more transaction-related links here -->
+                </div>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-light expandable" href="#" id="usersDropdown">
+                 ManageUsers
+                    <span class="float-right expand-icon"> <i class="fa fa-caret-cross"></i></span>
+                </a>
+                <div class="collapse dropdown-container" aria-labelledby="usersDropdown">
+                    <a class="dropdown-item" href="{% url 'manage_users' %}">
+                        <i class=""></i> Users
+                    </a>
+                    <a class="dropdown-item" href="{% url 'add_user' %}">
+                        <i class=""></i> Add User
+                    </a>
+                    <a class="dropdown-item" href="{% url 'user_log' %}">
+                        <i class=""></i>User Logs
+                    </a>
+                    <!-- Add more user-related links here -->
+                </div>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-light expandable" href="#" id="usersDropdown">
+        Reports
+                    <span class="float-right expand-icon"> <i class="fa fa-caret-cross"></i></span>
+                </a>
+                <div class="collapse dropdown-container" aria-labelledby="reportDropdown">
+                   
+                    <a class="dropdown-item" href="{% url 'report' %}">
+                        <i class=""></i>Report
+                    </a>
+                    <a class="dropdown-item" href="{% url 'investment_report' %}">
+                        <i class=""></i>Investment Report
+                    </a>
+                    <!-- Add more user-related links here -->
+                </div>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-light expandable" href="#" id="usersDropdown">
+        Groups
+                    <span class="float-right expand-icon"> <i class="fa fa-caret-cross"></i></span>
+                </a>
+                <div class="collapse dropdown-container" aria-labelledby="GroupDropdown">
+                   
+                    <a class="dropdown-item" href="{% url 'create_group' %}">
+                        <i class=""></i>Add Group
+                    </a>
+                    <a class="dropdown-item" href="{% url 'group_list' %}">
+                        <i class=""></i>Groups
+                    </a>
+                    <!-- Add more user-related links here -->
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+  <!-- Main Content -->
+  <div class="main-container">
+    {% block content %}{% endblock %}
+</div>
+<footer class=" footer text-center mt-5 bg-success ">
+    &copy; {% now "Y" %} Control Your Destiny. All rights reserved.
+</footer>
+
+    <!-- Bootstrap JS -->
+    <script src="{% static 'js/jquery-3.5.1.slim.min.js' %} "></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+
+
+    
+
+    <script>
+        function closeSidebarDropdowns() {
+            $('.dropdown-menu').hide();
+            $('.nav-item').removeClass('open');
+        }
+    
+        function toggleSidebarDropdown(dropdownId) {
+            var dropdownContent = $(`#${dropdownId}`).next('.dropdown-container');
+            var isDropdownOpen = dropdownContent.is(':visible');
+    
+            closeSidebarDropdowns();
+    
+            if (!isDropdownOpen) {
+                dropdownContent.show();
+                $(`#${dropdownId}`).parent('.nav-item').addClass('open');
+            }
+        }
+    
+        $(document).ready(function () {
+            $(".expandable").click(function () {
+                $(this).next(".collapse").collapse('toggle');
+                var expandIcon = $(this).find(".expand-icon i");
+                expandIcon.toggleClass("fa-plus fa-minus");
+            });
+    
+            $('#profileDropdown').click(function (e) {
+                e.stopPropagation();
+                toggleSidebarDropdown('profileDropdown');
+            });
+    
+            $(document).click(function () {
+                closeSidebarDropdowns();
+            });
+    
+            $('#investmentsDropdown').click(function (e) {
+                e.stopPropagation();
+                toggleSidebarDropdown('investmentsDropdown');
+            });
+    
+            $('#transactionsDropdown').click(function (e) {
+                e.stopPropagation();
+                toggleSidebarDropdown('transactionsDropdown');
+            });
+    
+            $('#usersDropdown').click(function (e) {
+                e.stopPropagation();
+                toggleSidebarDropdown('usersDropdown');
+            });
+        });
+    </script>
+</body>
+</html>

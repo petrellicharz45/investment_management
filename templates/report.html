@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="col-md-6">
+    <form id="dashboardForm" class="row" action="{% url 'investment_data' %}" method="get">
+        <div class="form-group col-md-6">
+            <label for="investments">Select Investment Group:</label>
+            <select class="form-control" id="group" name="group" multiple>
+                {% for group in investment_groups %}
+                    <option value="{{ group.id }}" {% if selected_group.id == group.id %}selected{% endif %}>{{ group.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group col-md-4">
+            <label for="gadgets">Select Gadgets:</label>
+            <select class="form-control" id="gadgets" name="gadgets" multiple>
+                <option value="line_chart" {% if 'line_chart' in selected_chart_types %}selected{% endif %}>Line Chart</option>
+                <option value="pie_chart" {% if 'pie_chart' in selected_chart_types %}selected{% endif %}>Pie Chart</option>
+                <!-- Add more gadget options here -->
+            </select>
+        </div>
+        <div class="form-group col-md-4">
+            <button type="submit" class="btn btn-primary btn-block" id="loadGadgets">Load Gadgets</button>
+        </div>
+    </form>
+    
+</div>
+{% endblock %}

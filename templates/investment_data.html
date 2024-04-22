@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-center">Dashboard</h1>
+
+
+<!-- Debugging information -->
+<div>
+    <p>{{ investments.investment_name }}</p>
+    <p> {{chart_type }}</p>
+</div>
+
+<!-- Display Line Chart -->
+<div class="chart-container" id="lineChartContainer">
+    {% if line_chart_image %}
+        <img src="data:image/png;base64,{{ line_chart_image }}" alt="Line Chart">
+    {% endif %}
+</div>
+
+<!-- Display Pie Chart -->
+<div class="chart-container" id="pieChartContainer">
+    {% if pie_chart_image %}
+        <img src="data:image/png;base64,{{ pie_chart_image }}" alt="Pie Chart">
+    {% endif %}
+</div>
+
+{% endblock %}

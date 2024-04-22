@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block content %}
+<div class="container mt-5">
+    <center>
+    <h1 class="mb-4">Investment Group Detail Up To Date</h1>
+
+    <h2>{{ group.name }} Group</h2></center>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Investment Name</th>
+                    
+                    <th>Total Investment Amount</th>
+                    <th>Total Interest Earned</th>
+                    <th>Available Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in investment_data %}
+                    <tr> 
+                        <td>{{ item.investment.investment_name }}</td>
+                      
+                        <td>{{ item.total_deposits |floatformat:2|intcomma}}</td>
+                        <td>{{ item.total_interest_earned |floatformat:2|intcomma}}</td>
+                        <td>{{ item.total_investment_amount |floatformat:2|intcomma}}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th>Total</th>
+        
+        <!--<th>{{ total_invested |floatformat:2|intcomma }}</th>-->
+        <th>{{ total_depot |floatformat:2|intcomma }}</th>
+        <th>{{ total_interest |floatformat:2|intcomma }}</th>
+        <th>{{ total_amount |floatformat:2|intcomma }}</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+{% endblock %}
