@@ -82,14 +82,27 @@ def add_investment(request):
 
 @login_required
 def investment_list(request):
-    investments = Investment.objects.all().order_by('investment_start_date')
-    
+    if request.user.is_superuser:
+        # If the user is a superuser, display all investments
+        investments = Investment.objects.all().order_by('investment_start_date')
+    else:
+        # Fetch investments belonging to user's groups
+        user_groups = request.user.investment_groups.all()
+        investments = Investment.objects.filter(investment_group__in=user_groups).order_by('investment_start_date')
+
     return render(request, 'investment_list.html', {'investments': investments})
+
 
 @login_required
 def transaction_list(request):
-    investments = Investment.objects.all()
-    transactions = Transaction.objects.all()
+    if request.user.is_superuser:
+       investments = Investment.objects.all()
+       transactions = Transaction.objects.all()
+    else:
+        user_groups = request.user.investment_groups.all()
+        investments = Investment.objects.filter(investment_group__in=user_groups)
+        transactions = Transaction.objects.filter(investment__in=investments)
+           
     return render(request, 'transaction_list.html', {'investments': investments, 'transactions': transactions})
 def is_admin(user):
     return user.is_superuser
@@ -110,69 +123,122 @@ def manage_users(request):
 
 import numpy as np  # Import numpy library for logarithmic scaling
 
-@user_passes_test(is_admin)
+@login_required
+
 def dashboard(request):
-    # Fetch all investments for all users
-    investments = Investment.objects.all()
+    if request.user.is_superuser:
+        # Fetch all investments for all users
+        investments = Investment.objects.all()
 
-    # Calculate the total number of investments, users, transactions, and groups
-    total_investments = investments.count()
-    total_users = User.objects.count()
-    total_transactions = Transaction.objects.count()
-    total_groups = InvestmentGroup.objects.count()
+        # Calculate the total number of investments, users, transactions, and groups
+        total_investments = investments.count()
+        total_users = User.objects.count()
+        total_transactions = Transaction.objects.count()
+        total_groups = InvestmentGroup.objects.count()
 
-    # Calculate total investment amounts including deposits
-    investment_data = []
-    for investment in investments:
-        deposit_total = Transaction.objects.filter(investment=investment, transaction_type='deposit').aggregate(total_deposit=Sum('amount'))['total_deposit']
-        if deposit_total is None:
-            deposit_total = 0
-        total_investment = investment.amount_invested + deposit_total
-        investment_data.append((investment.investment_name, total_investment / 100000))
+        # Calculate total investment amounts including deposits
+        investment_data = []
+        for investment in investments:
+            deposit_total = Transaction.objects.filter(investment=investment, transaction_type='deposit').aggregate(total_deposit=Sum('amount'))['total_deposit']
+            if deposit_total is None:
+                deposit_total = 0
+            total_investment = investment.amount_invested + deposit_total
+            investment_data.append((investment.investment_name, total_investment / 100000))
 
-    # Unpack the investment data for plotting
-    if investment_data:
-       labels, amounts = zip(*investment_data)
+        # Unpack the investment data for plotting
+        if investment_data:
+            labels, amounts = zip(*investment_data)
+        else:
+            labels, amounts = [], []
+
+        # Set Seaborn style
+        sns.set(style="whitegrid")
+
+        # Create the bar graph with Seaborn
+        plt.figure(figsize=(12, 8))  # Adjust the figure size as needed
+        ax = sns.barplot(x=labels, y=amounts, palette="viridis")  # Use a different color palette if needed
+        ax.set_yscale("log")  # Set a logarithmic scale for the y-axis
+        ax.set_ylabel('Investment in Millions')
+        ax.set_title('Portfolio Composition')
+
+        # Adjust x-axis tick labels for better visibility  
+        plt.xticks(rotation=45, ha='right', fontsize=12)  # Increase font size for better visibility
+        plt.subplots_adjust(bottom=0.3)  # Increase the bottom margin to accommodate rotated labels
+
+        # Annotate each bar with its corresponding investment amount
+        for bar, amount in zip(ax.patches, amounts):
+            ax.annotate(f'{amount:.2f}', (bar.get_x() + bar.get_width() / 2, bar.get_height()), ha='center', va='bottom')
+
+        # Add legend
+        legend = ax.legend(labels=labels, title="Investments", title_fontsize="12", loc='upper right')
+        legend.get_frame().set_linewidth(2)  # Set legend border thickness
+
+        # Convert the plot to an image
+        img = io.BytesIO()
+        plt.savefig(img, format='png')
+        img.seek(0)
+        plot_url = urllib.parse.quote(base64.b64encode(img.read()))
+
+        return render(request, 'dashboard.html', {
+            'investments': investments,
+            'plot_url': plot_url,
+            'total_investments': total_investments,
+            'total_users': total_users,
+            'total_transactions': total_transactions,
+            'total_groups': total_groups,
+        })
     else:
-       labels, amounts = [], []
-   
+        # Fetch investments belonging to user's groups
+        user_groups = request.user.investment_groups.all()
+        investments = Investment.objects.filter(investment_group__in=user_groups)
 
-    # Set Seaborn style
-    sns.set(style="whitegrid")
+        # Calculate total investment amounts including deposits
+        investment_data = []
+        for investment in investments:
+            deposit_total = Transaction.objects.filter(investment=investment, transaction_type='deposit').aggregate(total_deposit=Sum('amount'))['total_deposit']
+            if deposit_total is None:
+                deposit_total = 0
+            total_investment = investment.amount_invested + deposit_total
+            investment_data.append((investment.investment_name, total_investment / 100000))
 
-    # Create the bar graph with Seaborn
-    plt.figure(figsize=(12, 8))  # Adjust the figure size as needed
-    ax = sns.barplot(x=labels, y=amounts, palette="viridis")  # Use a different color palette if needed
-    ax.set_yscale("log")  # Set a logarithmic scale for the y-axis
-    ax.set_ylabel('Investment in Millions')
-    ax.set_title('Portfolio Composition')
+        # Unpack the investment data for plotting
+        if investment_data:
+            labels, amounts = zip(*investment_data)
+        else:
+            labels, amounts = [], []
 
-    # Adjust x-axis tick labels for better visibility  
-    plt.xticks(rotation=45, ha='right', fontsize=12)  # Increase font size for better visibility
-    plt.subplots_adjust(bottom=0.3)  # Increase the bottom margin to accommodate rotated labels
+        # Set Seaborn style
+        sns.set(style="whitegrid")
 
-    # Annotate each bar with its corresponding investment amount
-    for bar, amount in zip(ax.patches, amounts):
-        ax.annotate(f'{amount:.2f}', (bar.get_x() + bar.get_width() / 2, bar.get_height()), ha='center', va='bottom')
+        # Create the bar graph with Seaborn
+        plt.figure(figsize=(12, 8))  # Adjust the figure size as needed
+        ax = sns.barplot(x=labels, y=amounts, palette="viridis")  # Use a different color palette if needed
+        ax.set_yscale("log")  # Set a logarithmic scale for the y-axis
+        ax.set_ylabel('Investment in Millions')
+        ax.set_title('Portfolio Composition')
 
-    # Add legend
-    legend =ax.legend(labels=labels, title="Investments", title_fontsize="12", loc='upper right')
-    legend.get_frame().set_linewidth(2)  # Set legend border thickness
+        # Adjust x-axis tick labels for better visibility  
+        plt.xticks(rotation=45, ha='right', fontsize=12)  # Increase font size for better visibility
+        plt.subplots_adjust(bottom=0.3)  # Increase the bottom margin to accommodate rotated labels
 
-    # Convert the plot to an image
-    img = io.BytesIO()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    plot_url = urllib.parse.quote(base64.b64encode(img.read()))
+        # Annotate each bar with its corresponding investment amount
+        for bar, amount in zip(ax.patches, amounts):
+            ax.annotate(f'{amount:.2f}', (bar.get_x() + bar.get_width() / 2, bar.get_height()), ha='center', va='bottom')
 
-    return render(request, 'dashboard.html', {
-        'investments': investments,
-        'plot_url': plot_url,
-        'total_investments': total_investments,
-        'total_users': total_users,
-        'total_transactions': total_transactions,
-        'total_groups': total_groups,
-    })
+        # Add legend
+        legend = ax.legend(labels=labels, title="Investments", title_fontsize="12", loc='upper right')
+        legend.get_frame().set_linewidth(2)  # Set legend border thickness
+
+        # Convert the plot to an image
+        img = io.BytesIO()
+        plt.savefig(img, format='png')
+        img.seek(0)
+        plot_url = urllib.parse.quote(base64.b64encode(img.read()))
+
+        return render(request, 'dashboard.html', {
+            'investments': investments,
+            'plot_url': plot_url,
+        })
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 from decimal import Decimal
@@ -643,7 +709,9 @@ def access_logs(request):
 @login_required
 def report(request):
      # Retrieve investment groups and their investments
-    investment_groups = InvestmentGroup.objects.all()
+     
+    investment_groups = request.user.investment_groups.all()
+    
     return render(request, 'report.html', {'investment_groups': investment_groups})
 
 
@@ -753,8 +821,15 @@ def add_members(request, group_id):
     return render(request, 'add_members.html', {'group': group, 'users': users})
 
 def investment_report(request):
+    if request.user.is_superuser:
+        # For superuser, fetch all investments
+        investment_groups = InvestmentGroup.objects.all()
+    else:
+        # For regular users, fetch investments only for their group
+        investment_groups= request.user.investment_groups.all()
+        
+
     # Retrieve investment groups and their investments
-    investment_groups = InvestmentGroup.objects.all()
     
     # Create a list to store the report data
     report_data = []

@@ -19,7 +19,9 @@
                                 <th>Transaction Type</th>
                                 <th>Amount</th>
                                 <th>Added By</th>
+                                {% if user.is_superuser %}
                                 <th>Actions</th>
+                                {% endif %}
                             </tr>
                         </thead>
                         <tbody>
@@ -36,10 +38,12 @@
                                     <td>{{ transaction.transaction_type }}</td>
                                     <td>{{ transaction.amount | intcomma }}</td>
                                     <td>{{ transaction.added_by.first_name }}</td>
-                                    <td>
+                                   
+                                    {% if user.is_superuser %} <td> 
                                         <a href="{% url 'transaction_edit' transaction.id %}" class="btn btn-warning btn-sm">Edit</a>
                                         <a href="{% url 'transaction_delete' transaction.id %}" class="btn btn-danger btn-sm">Delete</a>
                                     </td>
+                                    {% endif %}
                                 </tr>
                             {% endfor %}
                         </tbody>

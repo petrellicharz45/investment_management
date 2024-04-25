@@ -12,7 +12,9 @@
           <tr>
             <th>First Name</th>
             <th>Last Name</th>
+            {% if user.is_superuser %}
             <th>Action</th>
+            {% endif %}
           </tr>
         </thead>
         <tbody>
@@ -20,6 +22,7 @@
           <tr>
             <td>{{ member.first_name }}</td>
             <td>{{ member.last_name }}</td>
+            {% if user.is_superuser %}
             <td>
             
                 <form method="post" action="{% url 'leave_group' group.id %}">
@@ -28,13 +31,15 @@
                 </form>
              
             </td>
+            {% endif %}
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
-    
+    {% if user.is_superuser %}
     <a href="{% url 'group_list' %}" class="btn btn-primary mt-3">Back to Group List</a>
     <a href="{% url 'add_members' group.id %}" class="btn btn-success mt-3">Add More Members</a>
+    {%endif%}
   </div>
 {% endblock %}

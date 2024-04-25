@@ -14,8 +14,9 @@
             <th>Interest Rate</th>
            
             <th>Date</th> <!-- Add a new column for the action buttons -->
+            {% if user.is_superuser %}
             <th>Action</th>
-           
+           {%endif%}
         </tr>
     </thead>
     <tbody>
@@ -35,6 +36,7 @@
                 <td>{{ investment.interest_rate }}</td>
                
                 <td>{{ investment.investment_start_date }}</td>
+                {% if user.is_superuser %}
                 <td>
                     <!-- Add a delete button that links to the delete view for each investment -->
                     <form method="post" action="{% url 'delete_investment' investment.id %}">
@@ -44,6 +46,7 @@
                     <!-- Add an edit button that links to the edit view for each investment -->
                     <a href="{% url 'edit_investment' investment.id %}" class="btn btn-warning btn-sm">Edit</a>
                 </td>
+                {%endif%}
              
             </tr>
         {% endfor %}
